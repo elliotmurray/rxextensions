@@ -4,12 +4,12 @@ Some Kotlin extension functions for RxJava 3
 
 [![](https://jitpack.io/v/elliotmurray/rxextensions.svg)](https://jitpack.io/#elliotmurray/rxextensions)
 
-##Repository
+## Repository
 ```
 maven { url 'https://jitpack.io' }
 ```
 
-##Dependency
+## Dependency
 ```
 implementation 'com.github.elliotmurray:rxextensions:1.0'
 ```
