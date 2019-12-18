@@ -11,5 +11,5 @@ maven { url 'https://jitpack.io' }
 
 ## Dependency
 ```
-implementation 'com.github.elliotmurray:rxextensions:1.0'
+implementation 'uk.co.elliotmurray:rxextensions:1.0'
 ```
