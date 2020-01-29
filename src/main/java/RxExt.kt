@@ -61,3 +61,8 @@ fun <T1> Observable<T1>.takeWhen(other: Observable<*>): Observable<T1> {
     return other.withLatestFromPair(this)
         .map { it.second }
 }
+
+fun <T> List<Observable<T>>.combineLatest(): Observable<List<T>> = Observable.combineLatest(this) {
+    @Suppress("UNCHECKED_CAST")
+    (it as Array<out T>).toList()
+}
