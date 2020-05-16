@@ -3,6 +3,7 @@ package uk.co.elliotmurray.rxextensions
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.functions.BiFunction
 import io.reactivex.rxjava3.subjects.BehaviorSubject
+import uk.co.elliotmurray.rxextensions.observable.ObservableSwitchMapItems
 
 fun <T> Observable<Nullable<T>>.filterNotNull(): Observable<T> {
     return mapNotNull {
@@ -66,3 +67,7 @@ fun <T> List<Observable<T>>.combineLatest(): Observable<List<T>> = Observable.co
     @Suppress("UNCHECKED_CAST")
     (it as Array<out T>).toList()
 }
+
+fun <T, R : Any> Observable<List<T>>.switchMapItems(mapper: (T) -> Observable<R>): Observable<List<R>> = ObservableSwitchMapItems(this, mapper)
+fun <T, R : Any> Observable<List<T>>.switchMapItems(defaultValue: (T) -> R, mapper: (T) -> Observable<R>): Observable<List<R>> = ObservableSwitchMapItems(this, mapper, defaultValue)
+fun <T, R : Any> Observable<List<T>>.switchMapItems(defaultValue: R, mapper: (T) -> Observable<R>): Observable<List<R>> = ObservableSwitchMapItems(this, mapper, { defaultValue })
