@@ -2,8 +2,11 @@ package uk.co.elliotmurray.rxextensions
 
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.functions.BiFunction
+import io.reactivex.rxjava3.observers.TestObserver
 import io.reactivex.rxjava3.subjects.BehaviorSubject
+import io.reactivex.rxjava3.subscribers.TestSubscriber
 import uk.co.elliotmurray.rxextensions.observable.ObservableSwitchMapItems
+import kotlin.math.exp
 
 fun <T> Observable<Nullable<T>>.filterNotNull(): Observable<T> {
     return mapNotNull {
@@ -68,6 +71,11 @@ fun <T> List<Observable<T>>.combineLatest(): Observable<List<T>> = Observable.co
     (it as Array<out T>).toList()
 }
 
+//SwitchMapItems
 fun <T, R : Any> Observable<List<T>>.switchMapItems(mapper: (T) -> Observable<R>): Observable<List<R>> = ObservableSwitchMapItems(this, mapper)
 fun <T, R : Any> Observable<List<T>>.switchMapItems(defaultValue: (T) -> R, mapper: (T) -> Observable<R>): Observable<List<R>> = ObservableSwitchMapItems(this, mapper, defaultValue)
 fun <T, R : Any> Observable<List<T>>.switchMapItems(defaultValue: R, mapper: (T) -> Observable<R>): Observable<List<R>> = ObservableSwitchMapItems(this, mapper, { defaultValue })
+
+//Testing
+fun <T> TestObserver<T>.assertLastValue(expected: T): TestObserver<T> = assertValueAt(values().size - 1, expected)
+fun <T> TestObserver<T>.assertLastValue(expectedPredicate: (T) -> Boolean): TestObserver<T> = assertValueAt(values().size - 1, expectedPredicate)

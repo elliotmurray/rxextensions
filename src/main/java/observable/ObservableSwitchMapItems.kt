@@ -61,10 +61,12 @@ class ObservableSwitchMapItems<T, R : Any>(val source: Observable<List<T>>, val 
         }
 
         override fun onNext(newKeys: List<T>) {
-            val currentKeys = mappedDisposables.keys
+            val currentKeys = sourceItems
             val same = currentKeys.intersect(newKeys)
             val added = newKeys - same
             val removed = currentKeys - same
+            sourceItems.clear()
+            sourceItems.addAll(newKeys)
 
             added.forEach { key ->
                 mappedDisposables[key] = mapper(key).subscribe { value ->
@@ -75,9 +77,12 @@ class ObservableSwitchMapItems<T, R : Any>(val source: Observable<List<T>>, val 
 
             removed.forEach { key ->
                 mappedDisposables.remove(key)?.dispose()
+                values.remove(key)
             }
 
-            updateItems()
+            if(added.isEmpty()) {
+                updateItems()
+            }
         }
 
         override fun onError(e: Throwable) {
