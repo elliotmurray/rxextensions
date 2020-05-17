@@ -6,6 +6,7 @@ import io.reactivex.rxjava3.observers.TestObserver
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subscribers.TestSubscriber
 import uk.co.elliotmurray.rxextensions.observable.ObservableSwitchMapItems
+import java.util.concurrent.TimeUnit
 import kotlin.math.exp
 
 fun <T> Observable<Nullable<T>>.filterNotNull(): Observable<T> {
@@ -70,6 +71,41 @@ fun <T> List<Observable<T>>.combineLatest(): Observable<List<T>> = Observable.co
     @Suppress("UNCHECKED_CAST")
     (it as Array<out T>).toList()
 }
+
+fun <T> Observable<T>.print(mapper: (T) -> String = {it.toString()}): Observable<T> = doOnNext {
+    println(mapper(it))
+}
+
+fun <T> Observable<T>.print(tag: String, mapper: (T) -> String = {it.toString()}): Observable<T> = doOnNext {
+    println("$tag: ${mapper(it)}")
+}
+
+/**
+ * Throttles based on [other] and [time], if [other] fires then the source observable wont fire again
+ * until [time] has expired. After this point the source observable can freely fire until the next
+ * [other] event.
+ */
+fun <T> Observable<T>.throttleLatestWith(
+        other: Observable<*>,
+        time: Long,
+        timeUnit: TimeUnit
+): Observable<T> {
+    return combineLatestPair(
+            other.switchMap {
+                Observable.merge(
+                        Observable.just(false),
+                        Observable.timer(time, timeUnit).map { true }
+                )
+            }
+                    .startWithItem(true)
+    )
+            .filter {
+                it.second
+            }
+            .map { it.first }
+            .throttleLatest(time, timeUnit)
+}
+
 
 //SwitchMapItems
 fun <T, R : Any> Observable<List<T>>.switchMapItems(mapper: (T) -> Observable<R>): Observable<List<R>> = ObservableSwitchMapItems(this, mapper)
