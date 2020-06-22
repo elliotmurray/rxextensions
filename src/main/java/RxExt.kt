@@ -1,5 +1,6 @@
 package uk.co.elliotmurray.rxextensions
 
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.functions.BiFunction
 import io.reactivex.rxjava3.observers.TestObserver
@@ -62,6 +63,14 @@ fun <T1, T2> Observable<T1>.withLatestFromPair(other: Observable<T2>): Observabl
     return this.withLatestFrom(other, BiFunction { t1, t2 -> t1 to t2 })
 }
 
+fun <T1, T2, T3> Observable<T1>.combineLatestTriple(other: Observable<T2>): Observable<Triple<T1, T2, T3>> {
+    return Observable.combineLatest(this, other, BiFunction { t1, t2, t3 -> Triple(t1, t2, t3) })
+}
+
+fun <T1, T2, T3> Observable<T1>.withLatestFromTriple(other: Observable<T2>): Observable<Triple<T1, T2, T3>> {
+    return this.withLatestFrom(other, BiFunction { t1, t2, t3 -> Triple(t1, t2, t3) })
+}
+
 fun <T1> Observable<T1>.takeWhen(other: Observable<*>): Observable<T1> {
     return other.withLatestFromPair(this)
         .map { it.second }
@@ -106,12 +115,22 @@ fun <T> Observable<T>.throttleLatestWith(
             .throttleLatest(time, timeUnit)
 }
 
+fun <T> Observable<T>.doOnNext(func: (t: T) -> Any?) = this.map {
+    func(it)
+    it
+}
 
-//SwitchMapItems
-fun <T, R : Any> Observable<List<T>>.switchMapItems(mapper: (T) -> Observable<R>): Observable<List<R>> = ObservableSwitchMapItems(this, mapper)
-fun <T, R : Any> Observable<List<T>>.switchMapItems(defaultValue: (T) -> R, mapper: (T) -> Observable<R>): Observable<List<R>> = ObservableSwitchMapItems(this, mapper, defaultValue)
-fun <T, R : Any> Observable<List<T>>.switchMapItems(defaultValue: R, mapper: (T) -> Observable<R>): Observable<List<R>> = ObservableSwitchMapItems(this, mapper, { defaultValue })
+fun <T> Observable<T>.doOnNextConcat(func: (t: T) -> Completable) = this.concatMap {
+    func(it)
+            .toSingleDefault(it)
+            .toObservable()
+}
 
 //Testing
 fun <T> TestObserver<T>.assertLastValue(expected: T): TestObserver<T> = assertValueAt(values().size - 1, expected)
 fun <T> TestObserver<T>.assertLastValue(expectedPredicate: (T) -> Boolean): TestObserver<T> = assertValueAt(values().size - 1, expectedPredicate)
+
+
+fun <T, R : Any> Observable<List<T>>.switchMapItems(mapper: (T) -> Observable<R>): Observable<List<R>> = ObservableSwitchMapItems(this, mapper)
+fun <T, R : Any> Observable<List<T>>.switchMapItems(defaultValue: (T) -> R, mapper: (T) -> Observable<R>): Observable<List<R>> = ObservableSwitchMapItems(this, mapper, defaultValue)
+fun <T, R : Any> Observable<List<T>>.switchMapItems(defaultValue: R, mapper: (T) -> Observable<R>): Observable<List<R>> = ObservableSwitchMapItems(this, mapper, { defaultValue })
