@@ -2,13 +2,11 @@ package uk.co.elliotmurray.rxextensions
 
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.functions.BiFunction
+import io.reactivex.rxjava3.functions.*
 import io.reactivex.rxjava3.observers.TestObserver
 import io.reactivex.rxjava3.subjects.BehaviorSubject
-import io.reactivex.rxjava3.subscribers.TestSubscriber
 import uk.co.elliotmurray.rxextensions.observable.ObservableSwitchMapItems
 import java.util.concurrent.TimeUnit
-import kotlin.math.exp
 
 fun <T> Observable<Nullable<T>>.filterNotNull(): Observable<T> {
     return mapNotNull {
@@ -55,6 +53,26 @@ fun <T1, T2, O> Observable<T1>.combineLatest(other: Observable<T2>, func: (t1: T
     return Observable.combineLatest(this, other, BiFunction { t1, t2 -> func(t1, t2) })
 }
 
+fun <T1, T2, T3, O> Observable<T1>.combineLatest(o2: Observable<T2>, o3: Observable<T3>, func: (t1: T1, t2: T2, t3: T3) -> O): Observable<O> {
+    return Observable.combineLatest(this, o2, o3, Function3(func))
+}
+
+fun <T1, T2, T3, T4, O> Observable<T1>.combineLatest(o2: Observable<T2>, o3: Observable<T3>, o4: Observable<T4>, func: (t1: T1, t2: T2, t3: T3, t4: T4) -> O): Observable<O> {
+    return Observable.combineLatest(this, o2, o3, o4, Function4(func))
+}
+
+fun <T1, T2, T3, T4, T5, O> Observable<T1>.combineLatest(o2: Observable<T2>, o3: Observable<T3>, o4: Observable<T4>, o5: Observable<T5>, func: (t1: T1, t2: T2, t3: T3, t4: T4, t5: T5) -> O): Observable<O> {
+    return Observable.combineLatest(this, o2, o3, o4, o5, Function5(func))
+}
+
+fun <T1, T2, T3, T4, T5, T6, O> Observable<T1>.combineLatest(o2: Observable<T2>, o3: Observable<T3>, o4: Observable<T4>, o5: Observable<T5>, o6: Observable<T6>, func: (t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6) -> O): Observable<O> {
+    return Observable.combineLatest(this, o2, o3, o4, o5, o6, Function6(func))
+}
+
+fun <T1, T2, T3, T4, T5, T6, T7, O> Observable<T1>.combineLatest(o2: Observable<T2>, o3: Observable<T3>, o4: Observable<T4>, o5: Observable<T5>, o6: Observable<T6>, o7: Observable<T7>, func: (t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7) -> O): Observable<O> {
+    return Observable.combineLatest(this, o2, o3, o4, o5, o6, o7, Function7(func))
+}
+
 fun <T1, T2> Observable<T1>.combineLatestPair(other: Observable<T2>): Observable<Pair<T1, T2>> {
     return Observable.combineLatest(this, other, BiFunction { t1, t2 -> t1 to t2 })
 }
@@ -63,12 +81,12 @@ fun <T1, T2> Observable<T1>.withLatestFromPair(other: Observable<T2>): Observabl
     return this.withLatestFrom(other, BiFunction { t1, t2 -> t1 to t2 })
 }
 
-fun <T1, T2, T3> Observable<T1>.combineLatestTriple(other: Observable<T2>): Observable<Triple<T1, T2, T3>> {
-    return Observable.combineLatest(this, other, BiFunction { t1, t2, t3 -> Triple(t1, t2, t3) })
+fun <T1, T2, T3> Observable<T1>.combineLatestTriple(other: Observable<T2>, other2: Observable<T3>): Observable<Triple<T1, T2, T3>> {
+    return Observable.combineLatest(this, other, other2, Function3 { t1, t2, t3 -> Triple(t1, t2, t3) })
 }
 
-fun <T1, T2, T3> Observable<T1>.withLatestFromTriple(other: Observable<T2>): Observable<Triple<T1, T2, T3>> {
-    return this.withLatestFrom(other, BiFunction { t1, t2, t3 -> Triple(t1, t2, t3) })
+fun <T1, T2, T3> Observable<T1>.withLatestFromTriple(other: Observable<T2>, other2: Observable<T3>): Observable<Triple<T1, T2, T3>> {
+    return this.withLatestFrom(other, other2, Function3 { t1, t2, t3 -> Triple(t1, t2, t3) })
 }
 
 fun <T1> Observable<T1>.takeWhen(other: Observable<*>): Observable<T1> {
